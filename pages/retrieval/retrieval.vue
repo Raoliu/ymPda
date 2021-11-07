@@ -11,6 +11,23 @@
 					<view>物流号</view>
 					<input type="text" class="uni-input" placeholder="请输入物流号" name="code" />
 				</view>
+				
+				<view class="uni-form-item uni-column">
+					<view><label class="uni-column-required">*</label>产品名</view>
+					<view class="uni-input">
+						<view>
+							<picker @change="bindPickerChange1" :value="index" :range="array1">
+							    <view class="selector">{{array1[index1]}}</view>
+							</picker>
+						</view>
+					</view>
+					<image src="../../static/image/right.png" mode="aspectFill"></image>
+				</view>
+				<view class="uni-form-item uni-column">
+					<view><label class="uni-column-required">*</label>经销商</view>
+					<input type="text" class="uni-input" @click="chooseDealer" :disabled="true" placeholder="请选择经销商" name="code" />
+					<image src="../../static/image/right.png" mode="aspectFill"></image>
+				</view>
 				<view class="uni-form-item uni-column">
 					<view><label class="uni-column-required">*</label>码级别</view>
 					<view class="uni-input">
@@ -22,22 +39,6 @@
 					</view>
 					<image src="../../static/image/right.png" mode="aspectFill"></image>
 				</view>
-				<view class="uni-form-item uni-column">
-					<view><label class="uni-column-required">*</label>产品名</view>
-					<view class="uni-input">
-						<view>
-							<picker @change="bindPickerChange" :value="index" :range="array1">
-							    <view class="selector">{{array1[index]}}</view>
-							</picker>
-						</view>
-					</view>
-					<image src="../../static/image/right.png" mode="aspectFill"></image>
-				</view>
-				<view class="uni-form-item uni-column">
-					<view><label class="uni-column-required">*</label>经销商</view>
-					<input type="text" class="uni-input" @click="chooseDealer" :disabled="true" placeholder="请选择经销商" name="code" />
-					<image src="../../static/image/right.png" mode="aspectFill"></image>
-				</view>
 			</form>
 		</view>
 		<view class="page_footer">
@@ -47,6 +48,7 @@
 </template>
 
 <script>
+	import {prodInfoList,deptList} from '@/utils/api/api.js'
 	export default {
 		data() {
 			return {
@@ -54,12 +56,32 @@
 				array1: ['请选择产品名','中国', '美国', '巴西', '日本'],
 				array2: ['请选择经销商','中国', '美国', '巴西', '日本'],
 				index: 0,
+				index1: 0,
 			}
 		},
+		mounted() {
+			console.log("1234")
+			this.getProdInfoList();
+			this.getdeptList();
+		},
 		methods: {
+			getdeptList(){
+				deptList({pid:-1}).then(res=>{
+					console.log(res)
+				})
+			},
+			getProdInfoList(){
+				
+				prodInfoList().then(res=>{
+					console.log(res)
+				})
+			},
 			bindPickerChange: function(e) {
 			    console.log('picker发送选择改变，携带值为', e.target.value)
 			    this.index = e.target.value
+			},
+			bindPickerChange1: function(e) {
+				this.index1 = e.target.value
 			},
 			chooseDealer(){
 				uni.navigateTo({

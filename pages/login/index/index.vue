@@ -12,11 +12,16 @@
 				</view>
 				<view class="uni-form-item uni-column">
 					<image src="../../../static/image/user.png" mode="aspectFill"></image>
-					<input type="text" class="uni-input" placeholder="账号" name="userName" />
+					<input type="text" class="uni-input" value="admin" placeholder="账号" name="userName" />
 				</view>
 				<view class="uni-form-item uni-column">
 					<image src="../../../static/image/pwd.png" mode="aspectFill"></image>
-					<input password="true" class="uni-input" placeholder="密码" name="password" />
+					<input password="true" class="uni-input" value="123456" placeholder="密码" name="password" />
+				</view>
+				<view class="urlCode">
+					<image class="codeImg" src="../../../static/image/code.png" mode="aspectFill"></image>
+					<input type="text" class="uni-input" placeholder="验证码" name="code" />
+					<image class="codeUrl" :src="codeUrl" @click="getAuthCode" mode="aspectFill"></image>
 				</view>
 				<view class="uni-btn-v">
 					<button type="default" form-type="submit">登录</button>
@@ -30,29 +35,56 @@
 </template>
 
 <script>
-	import {login} from '@/utils/api/api.js'
+	import {login,getAuthCode} from '@/utils/api/api.js'
+	import {encrypt} from '../../../utils/js/encrypt.js'
 	export default {
 		data() {
 			return {
-				
+				codeUrl:'',
+				uuid:'',
 			}
 		},
+		onLoad() {
+			this.getAuthCode()
+		},
 		methods: {
+			getAuthCode(){
+				getAuthCode().then(res=>{
+					console.log(res.data)
+					this.codeUrl = res.data.img
+					this.uuid = res.data.uuid
+				})
+			},
 			formSubmit: function(e) {
 			                console.log('form发生了submit事件，携带数据为：' + JSON.stringify(e.detail.value))
 			                var formdata = e.detail.value
+							formdata.uuid = this.uuid
+							formdata.password = encrypt(formdata.password)
+							console.log(formdata.password)
 							login(formdata).then(res=>{
 								console.log(res)
+								if(res.data.token){
+									uni.showToast({
+										icon:'success',
+										title:'登陆成功',
+										duration:1500
+									})
+									sessionStorage.setItem('token',res.data.token)
+									setTimeout(function(){
+										uni.navigateTo({
+											url:'../../homeIndex/homeIndex'
+										})
+									},1500)
+								}else{
+									uni.showToast({
+										icon:'error',
+										title:'登陆失败',
+										duration:1500
+									})
+								}
 							}).catch(err=>{
 								console.log(err)
 							})
-							uni.navigateTo({
-								url:'../../homeIndex/homeIndex'
-							})
-			                // uni.showModal({
-			                //     content: '表单数据内容：' + JSON.stringify(formdata),
-			                //     showCancel: false
-			                // });
 			            },
 			            formReset: function(e) {
 			                console.log('清空数据')
@@ -106,7 +138,7 @@
 		margin: 30rpx 0;
 		position: relative;
 	}
-	.uni-column image{
+	.uni-column image,.codeImg{
 		width: 36rpx;
 		height: 36rpx;
 		position: absolute;
@@ -127,6 +159,27 @@
 		bottom: 0;
 		left: 0;
 		z-index: 0;
+	}
+	.urlCode{
+		 display:flex;
+		 line-height: 100rpx;
+		 width: 100%;
+		 position: relative;
+	 }
+	 .urlCode input{
+		border-bottom: 1px solid #CCCCCC;
+		color: #FFFFFF;
+		padding-top: 20rpx;
+		padding-bottom: 20rpx;
+		padding-left: 50rpx;
+		width: 60%;
+	}
+	.codeUrl{
+		height: 65rpx;
+		padding: 15rpx;
+		padding-left: 5%;
+		width: 35%;
+		display: block;
 	}
 	.page_footer image{
 		width: 100%;
