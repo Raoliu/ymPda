@@ -25,10 +25,29 @@ export function prodInfoList(data){
 		data: data
 	 })
 }
+
 //部门列表
 export function deptList(data){ 
 	return request({
 	    url: requestUrl+'api/dept',
+		data: data
+	 })
+}
+
+//溯源信息
+export function addProdSyInfo(data){ 
+	return request({
+	    url: requestUrl+'api/prodSyInfo',
+		method: 'post',
+		data: data
+	 })
+}
+
+//出库、入库
+export function prodSyInfoSycode(data){ 
+	return request({
+	    url: requestUrl+'api/prodSyInfoSycode',
+		method: 'post',
 		data: data
 	 })
 }

@@ -8,11 +8,11 @@
 			<form @submit="formSubmit" @reset="formReset">
 				<view class="uni-form-item uni-column">
 					<image src="../../../static/image/companyCode.png" mode="aspectFill"></image>
-					<input type="text" class="uni-input" placeholder="企业编码" name="companyCode" />
+					<input type="text" class="uni-input" value="102" placeholder="企业编码" name="companyCode" />
 				</view>
 				<view class="uni-form-item uni-column">
 					<image src="../../../static/image/user.png" mode="aspectFill"></image>
-					<input type="text" class="uni-input" value="admin" placeholder="账号" name="userName" />
+					<input type="text" class="uni-input" value="cxy" placeholder="账号" name="userName" />
 				</view>
 				<view class="uni-form-item uni-column">
 					<image src="../../../static/image/pwd.png" mode="aspectFill"></image>
@@ -36,6 +36,7 @@
 
 <script>
 	import {login,getAuthCode} from '@/utils/api/api.js'
+	import {prefixInteger} from '@/utils/util.js'
 	import {encrypt} from '../../../utils/js/encrypt.js'
 	export default {
 		data() {
@@ -61,6 +62,7 @@
 							formdata.uuid = this.uuid
 							formdata.password = encrypt(formdata.password)
 							console.log(formdata.password)
+							formdata.userName = formdata.companyCode+'_'+formdata.userName
 							login(formdata).then(res=>{
 								console.log(res)
 								if(res.data.token){
@@ -70,6 +72,8 @@
 										duration:1500
 									})
 									sessionStorage.setItem('token',res.data.token)
+									let deptCode = prefixInteger(res.data.user.user.dept.code,3)
+									sessionStorage.setItem('deptCode',deptCode)
 									setTimeout(function(){
 										uni.navigateTo({
 											url:'../../homeIndex/homeIndex'
@@ -84,6 +88,11 @@
 								}
 							}).catch(err=>{
 								console.log(err)
+								uni.showToast({
+									icon:'error',
+									title:err.msg,
+									duration:1500
+								})
 							})
 			            },
 			            formReset: function(e) {
