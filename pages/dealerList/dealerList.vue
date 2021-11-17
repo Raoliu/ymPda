@@ -1,5 +1,5 @@
 <template>
-	<view>
+	<view class="dealerList_body">
 		<view class="selector">
 			<view class="back" @click="back">
 				<image src="../../static/image/left.png"></image>
@@ -42,20 +42,7 @@
 						dealerId = item.id
 					}
 				})
-				var pages = getCurrentPages();
-				var currPage = pages[pages.length - 1];   //当前页面
-				var prevPage = pages[pages.length - 2];  //上一个页面
-				 
-				//直接调用上一个页面对象的setData()方法，把数据存到上一个页面中去
-				console.log(prevPage)
-				// prevPage.setData({dealerName:e.item.name,dealerId:dealerId});
-				// sessionStorage.setItem('dealer',JSON.stringify({dealerName:e.item.name,dealerId:dealerId}))
-				uni.navigateBack({
-					delta:1
-				})
-				// uni.navigateTo({
-				// 	url:'/pages/retrieval/retrieval?dealerName='+e.item.name+'&dealerId='+dealerId
-				// })
+				this.$emit('closeDealer',{show:false,dealerName:e.item.name,dealerId})
 			},
 			getdeptList() {
 				let letterList = []
@@ -84,15 +71,25 @@
 				})
 			},
 			back() {
-				uni.navigateBack({
-					delta: 1
-				})
+				this.$emit('closeDealer',{show:false})
+				// uni.navigateBack({
+				// 	delta: 1
+				// })
 			}
 		}
 	}
 </script>
 
 <style>
+	.dealerList_body{
+		position: fixed;
+		background-color: #FFFFFF;
+		width: 100vw;
+		height: 100vh;
+		top: 0;
+		left: 0;
+		z-index: 999;
+	}
 	.selector {
 		display: flex;
 		padding-top: 20rpx;

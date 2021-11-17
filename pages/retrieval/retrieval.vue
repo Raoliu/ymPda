@@ -47,17 +47,21 @@
 				</view>
 			</form>
 		</view>
-
+		<dealerList v-if="showDealer" @closeDealer="getData"></dealerList>
 	</view>
 </template>
 
 <script>
+	import dealerList from '@/pages/dealerList/dealerList'
 	import {prefixInteger} from '@/utils/util.js'
 	import {
 		prodInfoList,
 		addProdSyInfo
 	} from '@/utils/api/api.js'
 	export default {
+		components:{
+			dealerList
+		},
 		data() {
 			return {
 				array: ['请选择码级别', '单品码', '箱码'],
@@ -66,34 +70,21 @@
 				index1: 0,
 				dealerName: '',
 				dealerId: '',
-				data: []
+				data: [],
+				showDealer:false,
 			}
 		},
 		mounted() {
 			this.getProdInfoList();
-			
-		},
-		onShow(e){
-			console.log("1234", sessionStorage.getItem('dealer'))
-			if(sessionStorage.getItem('dealer')){
-				var dealer = JSON.parse(sessionStorage.getItem('dealer'))
-				this.dealerName = dealer.dealerName
-				this.dealerId = dealer.dealerId
-			}
-		},
-		onLoad(e) {
-			console.log("1234", sessionStorage.getItem('dealer'))
-			if(sessionStorage.getItem('dealer')){
-				var dealer = JSON.parse(sessionStorage.getItem('dealer'))
-				this.dealerName = dealer.dealerName
-				this.dealerId = dealer.dealerId
-			}
-			// if (!!e) {
-			// 	this.dealerName = e.dealerName
-			// 	this.dealerId = e.dealerId
-			// }
 		},
 		methods: {
+			getData(e){
+				this.showDealer = e.show
+				if(e.dealerName){
+					this.dealerName = e.dealerName
+					this.dealerId = e.dealerId
+				}
+			},
 			getProdInfoList() {
 				prodInfoList().then(res => {
 					console.log(res)
@@ -111,19 +102,19 @@
 				this.index1 = e.target.value
 			},
 			chooseDealer() {
-				uni.navigateTo({
-					url: '/pages/dealerList/dealerList'
-				})
+				this.showDealer = true
 			},
 			formSubmit(e) {
 				var formdata = e.detail.value
 				let proCode = ''
+				let proName = ''
 				let prodInfo = {
 					id: ''
 				}
 				this.data.map(item => {
 					if (this.array1[this.index1] === item.name) {
 						prodInfo.id = item.id
+						proName = item.name
 						proCode = prefixInteger(item.code,2)
 					}
 				})
@@ -131,20 +122,42 @@
 				formdata.type = 2
 				formdata.delearName = this.delearName
 				formdata.dealerId = this.dealerId
-				formdata.scanType = this.index
+				formdata.scanType = this.index  // 1 单品码 2 箱码
 				if(formdata.scanType==''||formdata.delearName==''||formdata.prodInfo.id==''){
 					uni.showToast({
 						title:'请填写完整',
 						icon:'none',
 						duration:1500
 					})
+					return;
 				}
 				console.log('form发生了submit事件，携带数据为：' + JSON.stringify(formdata))
 				addProdSyInfo(formdata).then(res => {
 					console.log(res)
-					uni.navigateTo({
-						url: `/pages/sacn/sacn?id=${res.data.id}&proCode=${proCode}&scanType=${formdata.scanType}&scanStatus=0&depId=${this.dealerId}`
-					})
+					let that = this
+					if(res.data.id){
+						let data = {
+							id:res.data.id,
+							orderNum:formdata.orderNum,
+							expressNum:formdata.expressNum,
+							delearName:formdata.dealerName,
+							proCode,
+							proName,
+							scanType:formdata.scanType,
+							scanStatus:'1',
+							depId:that.dealerId,
+						}
+						uni.navigateTo({
+							url: `/pages/sacn/sacn?data=${JSON.stringify(data)}`
+						})
+					}else{
+						uni.showToast({
+							title:'订单号重复！',
+							icon:'none',
+							duration:1500
+						})
+					}
+					
 				}).catch(err=>{
 					console.log(err)
 					uni.showToast({

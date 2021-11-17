@@ -1,7 +1,8 @@
 <template>
 	<view class="page_body">
-		<view>
-			<input type='text' v-model="formData.syCode" :auto-focus="true" @blur="getCode" :focus="autoFocus" />
+		<view style="margin: 10px auto;border-bottom:2rpx solid #c7c7c7;width: 70%;">
+			<input type='text' v-model="formData.syCode" :auto-focus="true" @input="getNetwordStatus"
+				:focus="autoFocus" />
 		</view>
 		<view class="scaned_goods_number">{{uploadList.length}}</view>
 		<view class="scaned_goods_text">
@@ -21,6 +22,9 @@
 
 <script>
 	import {
+		getNowTime
+	} from '@/utils/util.js'
+	import {
 		prodSyInfoSycode
 	} from '@/utils/api/api.js'
 	import myToast from '../../components/Toast.vue'
@@ -39,73 +43,145 @@
 					status: 'progress',
 				},
 				autoFocus: true,
-				proCode:'',
-				formData:{
-					scanStatus:'',
-					scanType:'',
-					syCode:'',
-					syInfoId:'',
-					depId:'',
+				proCode: '',
+				formData: {
+					scanStatus: '',
+					scanType: '',
+					syCode: '',
+					syInfoId: '',
+					depId: '',
 				},
-				uploadList:[],
-				innerAudioContext:''
+				delearName: '',
+				uploadList: [],
+				innerAudioContext: '',
+				dataSet: [],
+				orderNum:"",
+				expressNum:"",
+				proName:''
 			}
 		},
 		onLoad(e) {
 			this.autoFocus = true
+			console.log(e)
+			e = JSON.parse(e.data)
 			this.formData.syInfoId = e.id
 			this.formData.scanType = e.scanType
 			this.formData.scanStatus = e.scanStatus
 			this.formData.depId = e.depId
+			this.delearName = e.delearName
 			this.proCode = e.proCode
-			// 102020021637067
-			// 10202002163706605
-		},
-		mounted(){
-			// this.innerAudioContext = uni.createInnerAudioContext();
-			// console.log(this.innerAudioContext)
-			// this.innerAudioContext.autoplay = false;
-			// this.innerAudioContext.src = '@/static/audio/success.mp3';
-			// this.innerAudioContext.onPlay(() => {
-			//   console.log('开始播放');
-			// });
-			// this.innerAudioContext.onError((res) => {
-			//   console.log(res);
-			// });
+			this.orderNum = e.orderNum
+			this.expressNum = e.expressNum
+			this.proName = e.proName
 		},
 		methods: {
-			getCode(){
-				console.log(this.formData.syCode.substr(0,5))
-				console.log((sessionStorage.getItem('deptCode')+this.proCode))
-				if(this.formData.syCode){
-					if(this.formData.syCode.substr(0,5)!=(sessionStorage.getItem('deptCode')+this.proCode)){
-						wx.showToast({
-							title:'当前条码有误！',
-							duration:1500,
-							icon:'none'
-						})
-					}else{
-						if(this.formData.syCode.length==15){
-							this.formData.syCode=this.formData.syCode.substr(-15)
-						}else if(this.formData.syCode.length==17){
-							this.formData.syCode=this.formData.syCode.substr(-17)
+			getNetwordStatus() {
+				let that = this
+				if ((that.formData.scanType == '1' && that.formData.syCode.length == 17) || (that.formData.scanType ==
+						'2' && that.formData.syCode.length == 15)) {
+					uni.getNetworkType({
+						success: function(res) {
+							console.log('----------', res.networkType);
+							if (that.formData.syCode) {
+								if (that.formData.scanType == '1') { //单品码
+									that.formData.syCode = that.formData.syCode.substr(-17)
+								} else { //箱码
+									that.formData.syCode = that.formData.syCode.substr(-15)
+								}
+							}
+							// if (true) {
+							if (res.networkType == 'none') {
+								uni.showToast({
+									title: '当前网络状况不佳',
+									icon: 'none'
+								})
+								let createTime = getNowTime()
+								console.log(getNowTime())
+								let data = {
+									...that.formData,
+									...{
+										proCode: that.proCode,
+										createTime,
+										delearName: that.delearName,
+										orderNum:that.orderNum,
+										expressNum:that.expressNum,
+										proName:that.proName,
+									}
+								}
+								that.dataSet.push(data)
+								console.log(that.dataSet)
+							} else {
+								that.getCode()
+							}
+						},
+						fail(err) {
+							console.log('----------', err);
 						}
-						console.log(this.formData)
-						prodSyInfoSycode(this.formData).then(res=>{
-							console.log(res)
-							this.uploadList.push(this.formData.syCode)
-						})
-					}
-				}else{
-					console.log("----")
+					})
+
 				}
+
+			},
+			getCode() {
+				console.log(this.formData.syCode.substr(0, 5))
+				console.log((sessionStorage.getItem('deptCode') + this.proCode))
+
+				if (this.formData.syCode.substr(0, 5) != (sessionStorage.getItem('deptCode') + this.proCode)) {
+					wx.showToast({
+						title: '当前条码有误！',
+						duration: 1500,
+						icon: 'none'
+					})
+				} else {
+					console.log(this.formData)
+					prodSyInfoSycode(this.formData).then(res => {
+						console.log(res)
+						if (res.data.status == 200) {
+							uni.showToast({
+								title: '成功',
+								icon: 'none',
+								duration: 1500
+							})
+							this.music.success_music()
+							this.uploadList.push(this.formData.syCode)
+							this.formData.syCode = ''
+							this.autoFocus = true
+						} else {
+							this.music.fail_music()
+							uni.showToast({
+								title: '失败',
+								icon: 'none',
+								duration: 1500
+							})
+						}
+					}).catch(err => {
+						this.music.fail_music()
+						uni.showToast({
+							title: '失败',
+							icon: 'none',
+							duration: 1500
+						})
+					})
+				}
+				// } else {
+				// 	console.log("----")
+				// }
 			},
 			getToastData(e) {
 				console.log(e)
 				this.showDialog = e.show
 			},
 			stop() {
-				this.showDialog = true
+				// this.showDialog = true
+				console.log(JSON.stringify(this.dataSet))
+				if (this.dataSet.length > 0) {
+					let arr = JSON.parse(sessionStorage.getItem('formData'))||[]
+					arr = arr.concat(this.dataSet)
+					sessionStorage.setItem('formData', JSON.stringify(arr))
+				}
+				uni.navigateBack({
+					delta: 1
+				})
 			},
 			setFocus() {
 				this.autoFocus = true

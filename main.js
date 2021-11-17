@@ -1,8 +1,10 @@
 import App from './App'
+import music from '@/utils/music.js'
 
 // #ifndef VUE3
 import Vue from 'vue'
 Vue.config.productionTip = false
+Vue.prototype.music = music
 App.mpType = 'app'
 const app = new Vue({
     ...App

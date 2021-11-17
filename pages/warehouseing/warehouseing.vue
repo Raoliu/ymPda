@@ -22,44 +22,120 @@
 					<view><label class="uni-column-required">*</label>产品名</view>
 					<view class="uni-input">
 						<view>
-							<picker @change="bindPickerChange" :value="index" :range="array1">
-							    <view class="selector">{{array1[index]}}</view>
+							<picker @change="bindPickerChange1" :value="index1" :range="array1">
+							    <view class="selector">{{array1[index1]}}</view>
 							</picker>
 						</view>
 					</view>
 					<image src="../../static/image/right.png" mode="aspectFill"></image>
 				</view>
+				<view class="page_footer">
+					<button form-type="submit">开始扫描</button>
+				</view>
 			</form>
 		</view>
-		<view class="page_footer">
-			<button @click="scan">开始扫描</button>
-		</view>
+		
 	</view>
 </template>
 
 <script>
+	import {
+		prodInfoList,addProdSyInfo
+	} from '@/utils/api/api.js'
+	import {prefixInteger} from '@/utils/util.js'
 	export default {
 		data() {
 			return {
-				array: ['请选择码级别','中国', '美国', '巴西', '日本'],
-				array1: ['请选择产品名','中国', '美国', '巴西', '日本'],
-				array2: ['请选择经销商','中国', '美国', '巴西', '日本'],
+				array: ['请选择码级别', '单品码', '箱码'],
+				array1: ['请选择产品名'],
 				index: 0,
+				index1: 0,
 			}
 		},
+		mounted() {
+			this.getProdInfoList();
+			
+		},
 		methods: {
+			getProdInfoList() {
+				prodInfoList().then(res => {
+					console.log(res)
+					this.data = res.data
+					res.data.map(item => {
+						this.array1.push(item.name)
+					})
+				})
+			},
 			bindPickerChange: function(e) {
 			    console.log('picker发送选择改变，携带值为', e.target.value)
 			    this.index = e.target.value
+			},
+			bindPickerChange1: function(e) {
+			    console.log('picker发送选择改变，携带值为', e.target.value)
+			    this.index1 = e.target.value
 			},
 			chooseDealer(){
 				uni.navigateTo({
 					url:'/pages/dealerList/dealerList'
 				})
 			},
-			scan(){
-				uni.navigateTo({
-					url: '/pages/sacn/sacn'
+			formsubmit(e){
+				var formdata = e.detail.value
+				let proCode = ''
+				let depId = ''
+				let proName = ''
+				let prodInfo = {
+					id: ''
+				}
+				this.data.map(item => {
+					if (this.array1[this.index1] === item.name) {
+						prodInfo.id = item.id
+						proName = item.name
+						depId = item.depId
+						proCode = prefixInteger(item.code,2)
+					}
+				})
+				formdata.prodInfo = prodInfo
+				formdata.type = 2
+				formdata.scanType = this.index
+				if(formdata.scanType==''||formdata.prodInfo.id==''){
+					uni.showToast({
+						title:'请填写完整',
+						icon:'none',
+						duration:1500
+					})
+					return;
+				}
+				console.log('form发生了submit事件，携带数据为：' + JSON.stringify(formdata))
+				addProdSyInfo(formdata).then(res => {
+					console.log(res)
+					if(res.data.id){
+						let data = {
+							id:res.data.id,
+							proCode,
+							scanType:formdata.scanType,
+							scanStatus:'0',
+							proName,
+							depId,
+						}
+						uni.navigateTo({
+							url: `/pages/sacn/sacn?data=${JSON.stringify(data)}`
+						})
+					}else{
+						uni.showToast({
+							title:'订单号重复！',
+							icon:'none',
+							duration:1500
+						})
+					}
+					
+				}).catch(err=>{
+					console.log(err)
+					uni.showToast({
+						title:err.msg,
+						icon:'none',
+						duration:1500
+					})
 				})
 			}
 		}
