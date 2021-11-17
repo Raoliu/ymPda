@@ -5,7 +5,7 @@
 		},
 		onShow: function() {
 			console.log('App Show')
-			let hideTime = sessionStorage.getItem('hideTime')
+			let hideTime = uni.getStorageSync('hideTime')
 			let showTime = new Date().getTime()
 			let leaveTime=(showTime-hideTime)/1000
 			if(leaveTime>(1*60*1000)){
@@ -19,7 +19,7 @@
 			console.log('App Hide')
 			let date = new Date().getTime()
 			console.log(date)
-			sessionStorage.setItem('hideTime',date)
+			uni.setStorageSync('hideTime',date)
 		}
 	}
 </script>

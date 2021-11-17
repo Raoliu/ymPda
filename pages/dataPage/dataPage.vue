@@ -53,9 +53,9 @@
 			}
 		},
 		mounted() {
-			console.log(JSON.parse(sessionStorage.getItem('formData')))
-			if (JSON.parse(sessionStorage.getItem('formData'))) {
-				this.arr = JSON.parse(sessionStorage.getItem('formData'))
+			console.log(JSON.parse(uni.getStorageSync('formData')))
+			if (JSON.parse(uni.getStorageSync('formData'))) {
+				this.arr = JSON.parse(uni.getStorageSync('formData'))
 			}
 		},
 		methods: {
@@ -72,7 +72,7 @@
 							}
 							that.arr = []
 							that.music.success_music()
-							sessionStorage.removeItem('formData')
+							uni.removeStorageSync('formData')
 						}
 					},
 				})

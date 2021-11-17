@@ -5,10 +5,10 @@ function req(obj) {
 	var method = obj.method || "GET"; 
 	var url = HOST + obj.url || ""; 
 	var data = obj.data || {}; 
-	console.log(sessionStorage.getItem('token'))
+	console.log(uni.getStorageSync('token'))
 	var header = obj.header || {
 	    'Content-Type': obj.contentType || 'application/json',
-		'Authorization': sessionStorage.getItem('token')
+		'Authorization': uni.getStorageSync('token')||''
 	}; 
 	var success = obj.success; // 成功回调函数
 	var fail = obj.fail; //表示失败后，要执行的回调函数
@@ -18,6 +18,7 @@ function req(obj) {
         method: method,
 		header: header,
 		success: ((res) => {
+			console.log(JSON.stringify(res))
 		  if (res.statusCode === 403 || res.statusCode === 401) {
 		   // 错误处理，返回登录页
             uni.reLaunch({url:'/pages/login/index/index'})

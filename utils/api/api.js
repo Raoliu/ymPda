@@ -51,3 +51,11 @@ export function prodSyInfoSycode(data){
 		data: data
 	 })
 }
+
+//根据箱码查询溯源码
+export function queryByBoxCode(data){ 
+	return request({
+	    url: requestUrl+'api/prodSyCode/queryByBoxCode',
+		data: data
+	 })
+}

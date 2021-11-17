@@ -124,9 +124,9 @@
 			},
 			getCode() {
 				console.log(this.formData.syCode.substr(0, 5))
-				console.log((sessionStorage.getItem('deptCode') + this.proCode))
+				console.log((uni.getStorageSync('deptCode') + this.proCode))
 
-				if (this.formData.syCode.substr(0, 5) != (sessionStorage.getItem('deptCode') + this.proCode)) {
+				if (this.formData.syCode.substr(0, 5) != (uni.getStorageSync('deptCode') + this.proCode)) {
 					wx.showToast({
 						title: '当前条码有误！',
 						duration: 1500,
@@ -175,9 +175,9 @@
 				// this.showDialog = true
 				console.log(JSON.stringify(this.dataSet))
 				if (this.dataSet.length > 0) {
-					let arr = JSON.parse(sessionStorage.getItem('formData'))||[]
+					let arr = JSON.parse(uni.getStorageSync('formData'))||[]
 					arr = arr.concat(this.dataSet)
-					sessionStorage.setItem('formData', JSON.stringify(arr))
+					uni.setStorageSync('formData', JSON.stringify(arr))
 				}
 				uni.navigateBack({
 					delta: 1

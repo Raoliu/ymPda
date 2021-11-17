@@ -71,9 +71,9 @@
 										title:'登陆成功',
 										duration:1500
 									})
-									sessionStorage.setItem('token',res.data.token)
+									uni.setStorageSync('token',res.data.token)
 									let deptCode = prefixInteger(res.data.user.user.dept.code,3)
-									sessionStorage.setItem('deptCode',deptCode)
+									uni.setStorageSync('deptCode',deptCode)
 									setTimeout(function(){
 										uni.navigateTo({
 											url:'../../homeIndex/homeIndex'
