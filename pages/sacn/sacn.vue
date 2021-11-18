@@ -21,12 +21,8 @@
 </template>
 
 <script>
-	import {
-		getNowTime
-	} from '@/utils/util.js'
-	import {
-		prodSyInfoSycode
-	} from '@/utils/api/api.js'
+	import {getNowTime} from '@/utils/util.js'
+	import {prodSyInfoSycode} from '@/utils/api/api.js'
 	import myToast from '../../components/Toast.vue'
 	export default {
 		components: {
@@ -73,121 +69,133 @@
 			this.orderNum = e.orderNum
 			this.expressNum = e.expressNum
 			this.proName = e.proName
-		},
-		methods: {
-			getNetwordStatus() {
-				let that = this
-				console.log(that.formData.scanType,"----", that.formData.syCode)
-				if (that.formData.syCode) {
-					if (that.formData.scanType == '1') { //单品码
-						that.formData.syCode = that.formData.syCode.substr(-17)
-					} else { //箱码
-						that.formData.syCode = that.formData.syCode.substr(-15)
+			let that = this
+			uni.getNetworkType({
+					success: function(res) {
+						if (res.networkType == 'none') {
+							that.dialog.title = '当前网络状况差'
+							that.dialog.buttonText = '确定'
+							that.dialog.status = 'error'
+							that.showDialog = true
+						}
 					}
+			})
+	},
+	methods: {
+		getNetwordStatus() {
+			let that = this
+			console.log(that.formData.scanType, "----", that.formData.syCode)
+			if (that.formData.syCode) {
+				if (that.formData.scanType == '1') { //单品码
+					that.formData.syCode = that.formData.syCode.substr(-17)
+				} else { //箱码
+					that.formData.syCode = that.formData.syCode.substr(-15)
 				}
-				if ((that.formData.scanType == '1' && (that.formData.syCode.substr(0,3)==uni.getStorageSync('deptCode'))) || (that.formData.scanType ==
-						'2' && (that.formData.syCode.substr(0,3)==uni.getStorageSync('deptCode')))) {
-					uni.getNetworkType({
-						success: function(res) {
-							console.log('----------', res.networkType);
-							// if (true) {
-							if (res.networkType == 'none') {
-								uni.showToast({
-									title: '当前网络状况不佳',
-									icon: 'none'
-								})
-								let createTime = getNowTime()
-								console.log(getNowTime())
-								let data = {
-									...that.formData,
-									...{
-										proCode: that.proCode,
-										createTime,
-										delearName: that.delearName,
-										orderNum: that.orderNum,
-										expressNum: that.expressNum,
-										proName: that.proName,
-									}
+			}
+			if ((that.formData.scanType == '1' && (that.formData.syCode.substr(0, 3) == uni.getStorageSync(
+					'deptCode'))) || (that.formData.scanType ==
+					'2' && (that.formData.syCode.substr(0, 3) == uni.getStorageSync('deptCode')))) {
+				uni.getNetworkType({
+					success: function(res) {
+						console.log('----------', res.networkType);
+						// if (true) {
+						if (res.networkType == 'none') {
+							uni.showToast({
+								title: '当前网络状况不佳',
+								icon: 'none'
+							})
+							let createTime = getNowTime()
+							console.log(getNowTime())
+							let data = {
+								...that.formData,
+								...{
+									proCode: that.proCode,
+									createTime,
+									delearName: that.delearName,
+									orderNum: that.orderNum,
+									expressNum: that.expressNum,
+									proName: that.proName,
 								}
-								that.dataSet.push(data)
-								console.log(that.dataSet)
-							} else {
-								that.getCode()
 							}
-						},
-						fail(err) {
-							console.log('----------', err);
-						}
-					})
-
-				}
-
-			},
-			getCode() {
-				console.log(this.formData.syCode.substr(0, 5))
-				console.log((uni.getStorageSync('deptCode') + this.proCode))
-
-				if (this.formData.syCode.substr(0, 5) != (uni.getStorageSync('deptCode') + this.proCode)) {
-					wx.showToast({
-						title: '当前条码有误！',
-						duration: 1500,
-						icon: 'none'
-					})
-				} else {
-					console.log(this.formData)
-					prodSyInfoSycode(this.formData).then(res => {
-						console.log(res)
-						if (res.data.status == 200) {
-							uni.showToast({
-								title: '成功',
-								icon: 'none',
-								duration: 1500
-							})
-							this.music.success_music()
-							this.uploadList.push(this.formData.syCode)
-							this.formData.syCode = ''
-							this.autoFocus = true
+							that.dataSet.push(data)
+							console.log(that.dataSet)
 						} else {
-							this.music.fail_music()
-							uni.showToast({
-								title: '失败',
-								icon: 'none',
-								duration: 1500
-							})
+							that.getCode()
 						}
-					}).catch(err => {
+					},
+					fail(err) {
+						console.log('----------', err);
+					}
+				})
+
+			}
+
+		},
+		getCode() {
+			console.log(this.formData.syCode.substr(0, 5))
+			console.log((uni.getStorageSync('deptCode') + this.proCode))
+
+			if (this.formData.syCode.substr(0, 5) != (uni.getStorageSync('deptCode') + this.proCode)) {
+				wx.showToast({
+					title: '当前条码有误！',
+					duration: 1500,
+					icon: 'none'
+				})
+			} else {
+				console.log(this.formData)
+				prodSyInfoSycode(this.formData).then(res => {
+					console.log(res)
+					if (res.data.status == 200) {
+						uni.showToast({
+							title: '成功',
+							icon: 'none',
+							duration: 1500
+						})
+						this.music.success_music()
+						this.uploadList.push(this.formData.syCode)
+						this.formData.syCode = ''
+						this.autoFocus = true
+					} else {
 						this.music.fail_music()
 						uni.showToast({
 							title: '失败',
 							icon: 'none',
 							duration: 1500
 						})
+					}
+				}).catch(err => {
+					this.music.fail_music()
+					uni.showToast({
+						title: '失败',
+						icon: 'none',
+						duration: 1500
 					})
-				}
-				// } else {
-				// 	console.log("----")
-				// }
-			},
-			getToastData(e) {
-				console.log(e)
-				this.showDialog = e.show
-			},
-			stop() {
-				// this.showDialog = true
-				console.log(JSON.stringify(this.dataSet))
-				if (this.dataSet.length > 0) {
-					let arr = JSON.parse(uni.getStorageSync('formData')) || []
-					arr = arr.concat(this.dataSet)
-					uni.setStorageSync('formData', JSON.stringify(arr))
-				}
-				uni.navigateBack({
-					delta: 1
 				})
-			},
-			setFocus() {
-				this.autoFocus = true
 			}
+			// } else {
+			// 	console.log("----")
+			// }
+		},
+		getToastData(e) {
+			console.log(e)
+			this.showDialog = e.show
+		},
+		stop() {
+			// this.showDialog = true
+			console.log(JSON.stringify(this.dataSet))
+			if (this.dataSet.length > 0) {
+				let arr = JSON.parse(uni.getStorageSync('formData')) || []
+				arr = arr.concat(this.dataSet)
+				uni.setStorageSync('formData', JSON.stringify(arr))
+			}
+			uni.navigateBack({
+				delta: 1
+			})
+		},
+		setFocus() {
+			this.autoFocus = true
 		}
+	}
 	}
 </script>
 

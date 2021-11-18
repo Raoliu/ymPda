@@ -6,7 +6,7 @@
 		<view class="page_body">
 			<form class="page_body_form" @submit="formSubmit">
 				<view class="uni-form-item uni-column">
-					<view>订单号</view>
+					<view><label class="uni-column-required">*</label>订单号</view>
 					<input type="text" class="uni-input" placeholder="请输入订单号" name="orderNum" />
 				</view>
 				<view class="uni-form-item uni-column">
@@ -123,7 +123,7 @@
 				formdata.delearName = this.delearName
 				formdata.dealerId = this.dealerId
 				formdata.scanType = this.index  // 1 单品码 2 箱码
-				if(formdata.scanType==''||formdata.delearName==''||formdata.prodInfo.id==''){
+				if(formdata.scanType==''||formdata.delearName==''||formdata.prodInfo.id==''||formdata.orderNum==''){
 					uni.showToast({
 						title:'请填写完整',
 						icon:'none',

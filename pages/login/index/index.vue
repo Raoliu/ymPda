@@ -75,7 +75,7 @@
 									let deptCode = prefixInteger(res.data.user.user.dept.code,3)
 									uni.setStorageSync('deptCode',deptCode)
 									setTimeout(function(){
-										uni.navigateTo({
+										uni.redirectTo({
 											url:'../../homeIndex/homeIndex'
 										})
 									},1500)

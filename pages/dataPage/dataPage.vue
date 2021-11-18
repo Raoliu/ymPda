@@ -53,8 +53,7 @@
 			}
 		},
 		mounted() {
-			console.log(JSON.parse(uni.getStorageSync('formData')))
-			if (JSON.parse(uni.getStorageSync('formData'))) {
+			if (uni.getStorageSync('formData')) {
 				this.arr = JSON.parse(uni.getStorageSync('formData'))
 			}
 		},

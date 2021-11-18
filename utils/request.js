@@ -1,7 +1,7 @@
 function req(obj) {
   return new Promise((resolve, reject) => {
-	// const HOST = 'http://admin.yimafw.com/'
-	const HOST = 'http://lxtest.itkjb.com/'
+	const HOST = 'http://admin.yimafw.com/'
+	// const HOST = 'http://lxtest.itkjb.com/'
 	var method = obj.method || "GET"; 
 	var url = HOST + obj.url || ""; 
 	var data = obj.data || {}; 
@@ -18,7 +18,8 @@ function req(obj) {
         method: method,
 		header: header,
 		success: ((res) => {
-			console.log(JSON.stringify(res))
+			console.log(url)
+			console.log(res)
 		  if (res.statusCode === 403 || res.statusCode === 401) {
 		   // 错误处理，返回登录页
             uni.reLaunch({url:'/pages/login/index/index'})
