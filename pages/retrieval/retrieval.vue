@@ -237,7 +237,6 @@
 		width: 90%;
 		margin-left: auto;
 		margin-right: auto;
-		margin-top: 200rpx;
 		border-radius: 8rpx;
 		background-color: #3854EA;
 		font-size: 36rpx;

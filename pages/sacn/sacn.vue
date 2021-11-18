@@ -55,9 +55,9 @@
 				uploadList: [],
 				innerAudioContext: '',
 				dataSet: [],
-				orderNum:"",
-				expressNum:"",
-				proName:''
+				orderNum: "",
+				expressNum: "",
+				proName: ''
 			}
 		},
 		onLoad(e) {
@@ -77,18 +77,19 @@
 		methods: {
 			getNetwordStatus() {
 				let that = this
-				if ((that.formData.scanType == '1' && that.formData.syCode.length == 17) || (that.formData.scanType ==
-						'2' && that.formData.syCode.length == 15)) {
+				console.log(that.formData.scanType,"----", that.formData.syCode)
+				if (that.formData.syCode) {
+					if (that.formData.scanType == '1') { //单品码
+						that.formData.syCode = that.formData.syCode.substr(-17)
+					} else { //箱码
+						that.formData.syCode = that.formData.syCode.substr(-15)
+					}
+				}
+				if ((that.formData.scanType == '1' && (that.formData.syCode.substr(0,3)==uni.getStorageSync('deptCode'))) || (that.formData.scanType ==
+						'2' && (that.formData.syCode.substr(0,3)==uni.getStorageSync('deptCode')))) {
 					uni.getNetworkType({
 						success: function(res) {
 							console.log('----------', res.networkType);
-							if (that.formData.syCode) {
-								if (that.formData.scanType == '1') { //单品码
-									that.formData.syCode = that.formData.syCode.substr(-17)
-								} else { //箱码
-									that.formData.syCode = that.formData.syCode.substr(-15)
-								}
-							}
 							// if (true) {
 							if (res.networkType == 'none') {
 								uni.showToast({
@@ -103,9 +104,9 @@
 										proCode: that.proCode,
 										createTime,
 										delearName: that.delearName,
-										orderNum:that.orderNum,
-										expressNum:that.expressNum,
-										proName:that.proName,
+										orderNum: that.orderNum,
+										expressNum: that.expressNum,
+										proName: that.proName,
 									}
 								}
 								that.dataSet.push(data)
@@ -175,7 +176,7 @@
 				// this.showDialog = true
 				console.log(JSON.stringify(this.dataSet))
 				if (this.dataSet.length > 0) {
-					let arr = JSON.parse(uni.getStorageSync('formData'))||[]
+					let arr = JSON.parse(uni.getStorageSync('formData')) || []
 					arr = arr.concat(this.dataSet)
 					uni.setStorageSync('formData', JSON.stringify(arr))
 				}
